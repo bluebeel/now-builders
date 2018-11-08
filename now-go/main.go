@@ -57,14 +57,14 @@ func createErrorResponse(message string, code string, statusCode int) (Response,
 	}, nil
 }
 
-// middleware provides a convenient mechanism for filtering HTTP requests
+// Middleware provides a convenient mechanism for filtering HTTP requests
 // entering the application. It returns a new handler which performs various
 // operations and finishes with calling the next HTTP handler.
-type middleware func(http.HandlerFunc) http.HandlerFunc
+type Middleware func(http.HandlerFunc) http.HandlerFunc
 
 // chainMiddleware provides syntactic sugar to create a new middleware
 // which will be the result of chaining the ones received as parameters.
-func chainMiddleware(mw ...middleware) middleware {
+func chainMiddleware(mw ...Middleware) Middleware {
 	return func(final http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
 			last := final
@@ -83,7 +83,7 @@ func main() {
 	}
 
 	mw := chainMiddleware(__NOW_MIDDLEWARES)
-	http.HandleFunc("/", mw(__NOW_HANDLER_FUNC_NAME))
+	http.Handle("/", mw(__NOW_HANDLER_FUNC_NAME))
 	go http.Serve(l, nil)
 
 	handler := func(_req events.APIGatewayProxyRequest) (Response, error) {
