@@ -1,5 +1,5 @@
 {
-  "name": "@now/go",
+  "name": "@bluebeel/go",
   "version": "0.2.6",
   "scripts": {
     "test": "best -I test/*.js",

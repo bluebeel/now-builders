@@ -6,6 +6,7 @@ import (
 	"go/parser"
 	"go/token"
 	"os"
+	"strings"
 )
 
 func main() {
@@ -24,6 +25,7 @@ func main() {
 		os.Exit(1)
 	}
 
+	output := make([]string, 0)
 	for _, decl := range parsed.Decls {
 		fn, ok := decl.(*ast.FuncDecl)
 		if !ok {
@@ -32,10 +34,11 @@ func main() {
 			continue
 		}
 		if fn.Name.IsExported() == true {
-			// we found the first exported function
-			// we're done!
-			fmt.Print(fn.Name.Name)
-			os.Exit(0)
+			// we found a exported function
+			// we save it to the outpout array!
+			output = append(output, fn.Name.Name)
 		}
 	}
+	fmt.Println(strings.Join(output, ","))
+	os.Exit(0)
 }

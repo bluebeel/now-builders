@@ -4,12 +4,13 @@ import (
 	b64 "encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/aws/aws-lambda-go/events"
-	"github.com/aws/aws-lambda-go/lambda"
 	"io/ioutil"
 	"net"
 	"net/http"
 	"strings"
+
+	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-lambda-go/lambda"
 )
 
 type Request struct {
@@ -56,13 +57,33 @@ func createErrorResponse(message string, code string, statusCode int) (Response,
 	}, nil
 }
 
+// middleware provides a convenient mechanism for filtering HTTP requests
+// entering the application. It returns a new handler which performs various
+// operations and finishes with calling the next HTTP handler.
+type middleware func(http.HandlerFunc) http.HandlerFunc
+
+// chainMiddleware provides syntactic sugar to create a new middleware
+// which will be the result of chaining the ones received as parameters.
+func chainMiddleware(mw ...middleware) middleware {
+	return func(final http.HandlerFunc) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			last := final
+			for i := len(mw) - 1; i >= 0; i-- {
+				last = mw[i](last)
+			}
+			last(w, r)
+		}
+	}
+}
+
 func main() {
 	l, err := net.Listen("tcp", ":0")
 	if err != nil {
 		panic(err)
 	}
 
-	http.HandleFunc("/", __NOW_HANDLER_FUNC_NAME)
+	mw := chainMiddleware(__NOW_MIDDLEWARES)
+	http.HandleFunc("/", mw(__NOW_HANDLER_FUNC_NAME))
 	go http.Serve(l, nil)
 
 	handler := func(_req events.APIGatewayProxyRequest) (Response, error) {

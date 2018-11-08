@@ -69,10 +69,22 @@ exports.build = async ({files, entrypoint, config}) => {
     throw e
   }
 
-  console.log(`Found exported function "${handlerFunctionName}" on \"${entrypoint}\"`)
+  let functions = handlerFunctionName.split(",")
+  for (let func in functions) {
+    console.log(`Found exported function "${func}" on \"${entrypoint}\"`)
+  }
+
+  // we recover the function that does not respect the writing for a middleware "withXXX" or "MiddlewareXXX"
+  let handler = functions.find(element => {
+    return element.includes("With") || element.includes("Middleware")
+  })
+  // we remove it from the array
+  let index = functions.indexOf(handler)
+  functions.splice(index, 1)
 
   const origianlMainGoContents = await readFile(path.join(__dirname, 'main.go'), 'utf8')
-  const mainGoContents = origianlMainGoContents.replace('__NOW_HANDLER_FUNC_NAME', handlerFunctionName)
+  const mainGoContents = origianlMainGoContents.replace('__NOW_HANDLER_FUNC_NAME', handler)
+  const mainGoContents = mainGoContents.replace('__NOW_MIDDLEWARES', functions.join(', '))
   // in order to allow the user to have `main.go`, we need our `main.go` to be called something else
   const mainGoFileName = 'main__now__go__.go'
 
