@@ -7,6 +7,7 @@ const getWritableDirectory = require('@now/build-utils/fs/get-writable-directory
 const download = require('@now/build-utils/fs/download.js');
 const downloadGit = require("lambda-git")
 const downloadGoBin = require("./download-go-bin")
+const downloadUpxBin = require("./download-go-bin")
 const glob = require('@now/build-utils/fs/glob.js');
 
 const goFilenames = new Set([
@@ -38,6 +39,9 @@ exports.build = async ({files, entrypoint, config}) => {
 
   console.log('downloading go binary...')
   const goBin = await downloadGoBin()
+
+  console.log('downloading upx binary...')
+  const upxBin = await downloadUpxBin()
 
   console.log('downloading git binary...')
   // downloads a git binary that works on Amazon Linux and sets
@@ -114,8 +118,12 @@ exports.build = async ({files, entrypoint, config}) => {
   try {
     await execa(goBin, [
       'build',
+      '-ldflags="-s -w"',
       '-o', path.join(outDir, 'handler'),
       path.join(entrypointDirname, mainGoFileName), files[entrypoint].fsPath
+    ], {env: goEnv, cwd: entrypointDirname, stdio: 'inherit'})
+    await execa(upxBin, [
+      path.join(outDir, 'handler'),
     ], {env: goEnv, cwd: entrypointDirname, stdio: 'inherit'})
   } catch (err) { 
     console.log('failed to `go build`')
