@@ -74,13 +74,16 @@ exports.build = async ({files, entrypoint, config}) => {
     console.log(`Found exported function "${functions[i]}" on \"${entrypoint}\"`)
   }
 
-  // we recover the function that does not respect the writing for a middleware "withXXX" or "MiddlewareXXX"
+  // we recover the Handler function.
   let handler = functions.find(element => {
-    return !element.includes("With") && !element.includes("Middleware")
+    return element.includes("-Handler")
   })
   // we remove it from the array
   let index = functions.indexOf(handler)
   functions.splice(index, 1)
+
+  // we remove the '-Middleware' from the middleware function.
+  functions = functions.map(func => func.replace('-Middleware', ''))
 
   const origianlMainGoContents = await readFile(path.join(__dirname, 'main.go'), 'utf8')
   let mainGoContents = origianlMainGoContents.replace('__NOW_HANDLER_FUNC_NAME', handler)
