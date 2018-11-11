@@ -86,7 +86,7 @@ exports.build = async ({files, entrypoint, config}) => {
   functions = functions.map(func => func.replace('-Middleware', ''))
 
   const origianlMainGoContents = await readFile(path.join(__dirname, 'main.go'), 'utf8')
-  let mainGoContents = origianlMainGoContents.replace('__NOW_HANDLER_FUNC_NAME', handler)
+  let mainGoContents = origianlMainGoContents.replace('__NOW_HANDLER_FUNC_NAME', handler.replace('-Handler', ''))
   mainGoContents = mainGoContents.replace('__NOW_MIDDLEWARES', functions.join(', '))
   // in order to allow the user to have `main.go`, we need our `main.go` to be called something else
   const mainGoFileName = 'main__now__go__.go'
