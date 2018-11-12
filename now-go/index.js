@@ -118,7 +118,6 @@ exports.build = async ({files, entrypoint, config}) => {
   try {
     await execa(goBin, [
       'build',
-      '-ldflags="-s -w"',
       '-o', path.join(outDir, 'handler'),
       path.join(entrypointDirname, mainGoFileName), files[entrypoint].fsPath
     ], {env: goEnv, cwd: entrypointDirname, stdio: 'inherit'})
