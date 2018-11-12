@@ -8,6 +8,7 @@
   "files": [
     "bin",
     "download-go-bin.js",
+    "download-upx.js",
     "index.js",
     "main.go"
   ],
