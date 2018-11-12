@@ -7,7 +7,7 @@ const getWritableDirectory = require('@now/build-utils/fs/get-writable-directory
 const download = require('@now/build-utils/fs/download.js');
 const downloadGit = require("lambda-git")
 const downloadGoBin = require("./download-go-bin")
-const downloadUpxBin = require("./download-go-bin")
+const downloadUpxBin = require("./download-upx")
 const glob = require('@now/build-utils/fs/glob.js');
 
 const goFilenames = new Set([

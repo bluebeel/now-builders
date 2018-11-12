@@ -18,7 +18,7 @@ module.exports = async () => {
     res.body
       .on('error', reject)
       .pipe(tar.extract({ cwd: dir, strip: 1 }))
-      .on('finish', () => resolve(path.join(dir, 'bin', 'upx')));
+      .on('finish', () => resolve(path.join(dir, 'upx')));
   })
 
 }
