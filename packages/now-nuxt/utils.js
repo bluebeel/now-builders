@@ -10,14 +10,14 @@ const rename = require('@now/build-utils/fs/rename.js');
  * @throws {Error}
  */
 function validateEntrypoint(entrypoint) {
-    if (
-        !/package\.json$/.exec(entrypoint) &&
-        !/nuxt\.config\.js$/.exec(entrypoint)
-    ) {
-        throw new Error(
-            'Specified "src" for "@now/nuxt" has to be "package.json" or "nuxt.config.js"',
-        );
-    }
+  if (
+    !/package\.json$/.exec(entrypoint)
+    && !/nuxt\.config\.js$/.exec(entrypoint)
+  ) {
+    throw new Error(
+      'Specified "src" for "@now/nuxt" has to be "package.json" or "nuxt.config.js"',
+    );
+  }
 }
 
 /**
@@ -35,15 +35,15 @@ function validateEntrypoint(entrypoint) {
  * @returns {Files}
  */
 function excludeFiles(files, matcher) {
-    return Object.keys(files).reduce((newFiles, filePath) => {
-        if (matcher(filePath)) {
-            return newFiles;
-        }
-        return {
-            ...newFiles,
-            [filePath]: files[filePath],
-        };
-    }, {});
+  return Object.keys(files).reduce((newFiles, filePath) => {
+    if (matcher(filePath)) {
+      return newFiles;
+    }
+    return {
+      ...newFiles,
+      [filePath]: files[filePath],
+    };
+  }, {});
 }
 
 /**
@@ -53,15 +53,15 @@ function excludeFiles(files, matcher) {
  * @returns {Files}
  */
 function includeOnlyEntryDirectory(files, entryDirectory) {
-    if (entryDirectory === '.') {
-        return files;
-    }
+  if (entryDirectory === '.') {
+    return files;
+  }
 
-    function matcher(filePath) {
-        return !filePath.startsWith(entryDirectory);
-    }
+  function matcher(filePath) {
+    return !filePath.startsWith(entryDirectory);
+  }
 
-    return excludeFiles(files, matcher);
+  return excludeFiles(files, matcher);
 }
 
 /**
@@ -71,15 +71,15 @@ function includeOnlyEntryDirectory(files, entryDirectory) {
  * @returns {Files}
  */
 function moveEntryDirectoryToRoot(files, entryDirectory) {
-    if (entryDirectory === '.') {
-        return files;
-    }
+  if (entryDirectory === '.') {
+    return files;
+  }
 
-    function delegate(filePath) {
-        return filePath.replace(new RegExp(`^${entryDirectory}/`), '');
-    }
+  function delegate(filePath) {
+    return filePath.replace(new RegExp(`^${entryDirectory}/`), '');
+  }
 
-    return rename(files, delegate);
+  return rename(files, delegate);
 }
 
 /**
@@ -88,14 +88,14 @@ function moveEntryDirectoryToRoot(files, entryDirectory) {
  * @returns {Files}
  */
 function excludeLockFiles(files) {
-    const newFiles = files;
-    if (newFiles['package-lock.json']) {
-        delete newFiles['package-lock.json'];
-    }
-    if (newFiles['yarn.lock']) {
-        delete newFiles['yarn.lock'];
-    }
-    return files;
+  const newFiles = files;
+  if (newFiles['package-lock.json']) {
+    delete newFiles['package-lock.json'];
+  }
+  if (newFiles['yarn.lock']) {
+    delete newFiles['yarn.lock'];
+  }
+  return files;
 }
 
 /**
@@ -103,21 +103,20 @@ function excludeLockFiles(files) {
  * @param {{dependencies?: any, devDependencies?: any, scripts?: any}} defaultPackageJson
  */
 function normalizePackageJson(defaultPackageJson = {}) {
-
-    return {
-        ...defaultPackageJson,
-        scripts: {
-            ...defaultPackageJson.scripts,
-            'now-build': 'nuxt build --no-generate',
-        },
-    };
+  return {
+    ...defaultPackageJson,
+    scripts: {
+      ...defaultPackageJson.scripts,
+      'now-build': 'nuxt build --no-generate',
+    },
+  };
 }
 
 module.exports = {
-    excludeFiles,
-    validateEntrypoint,
-    includeOnlyEntryDirectory,
-    moveEntryDirectoryToRoot,
-    excludeLockFiles,
-    normalizePackageJson
+  excludeFiles,
+  validateEntrypoint,
+  includeOnlyEntryDirectory,
+  moveEntryDirectoryToRoot,
+  excludeLockFiles,
+  normalizePackageJson,
 };
