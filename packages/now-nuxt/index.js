@@ -16,6 +16,7 @@ const {
   moveEntryDirectoryToRoot,
   excludeLockFiles,
   normalizePackageJson,
+  onlyStaticDirectory,
 } = require('./utils');
 
 /** @typedef { import('@now/build-utils/file-ref').Files } Files */
@@ -180,7 +181,32 @@ exports.build = async ({ files, workPath, entrypoint }) => {
     }),
   );
 
-  return { ...lambdas };
+  const nuxtStaticFiles = await glob(
+    '**',
+    path.join(workPath, '.nuxt', 'dist', 'client'),
+  );
+  const staticFiles = Object.keys(nuxtStaticFiles).reduce(
+    (mappedFiles, file) => ({
+      ...mappedFiles,
+      [path.join(entryDirectory, `_nuxt/${file}`)]: nuxtStaticFiles[file],
+    }),
+    {},
+  );
+
+  const nuxtStaticDirectory = onlyStaticDirectory(filesWithoutLockfiles);
+  const staticDirectoryFiles = Object.keys(nuxtStaticDirectory).reduce(
+    (mappedFiles, file) => ({
+      ...mappedFiles,
+      [path.join(entryDirectory, `${file.slice(6)}`)]: nuxtStaticDirectory[file],
+    }),
+    {},
+  );
+
+  return {
+    ...lambdas,
+    ...staticFiles,
+    ...staticDirectoryFiles,
+  };
 };
 
 exports.prepareCache = async ({
